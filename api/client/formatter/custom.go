@@ -210,6 +210,11 @@ func (c *imageContext) Size() string {
 	return units.HumanSize(float64(c.i.Size))
 }
 
+func (c *imageContext) RawSize() string {
+	c.addHeader(sizeHeader)
+	return strconv.FormatInt(c.i.Size, 10)
+}
+
 type subContext interface {
 	fullHeader() string
 	addHeader(header string)

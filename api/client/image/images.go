@@ -14,6 +14,7 @@ import (
 type imagesOptions struct {
 	matchName string
 
+	human       bool
 	quiet       bool
 	all         bool
 	noTrunc     bool
@@ -40,6 +41,7 @@ func NewImagesCommand(dockerCli *client.DockerCli) *cobra.Command {
 
 	flags := cmd.Flags()
 
+	flags.BoolVarP(&opts.human, "human", "H", true, "Print sizes and dates in human readable format")
 	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Only show numeric IDs")
 	flags.BoolVarP(&opts.all, "all", "a", false, "Show all images (default hides intermediate images)")
 	flags.BoolVar(&opts.noTrunc, "no-trunc", false, "Don't truncate output")
@@ -93,6 +95,7 @@ func runImages(dockerCli *client.DockerCli, opts imagesOptions) error {
 			Quiet:  opts.quiet,
 			Trunc:  !opts.noTrunc,
 		},
+		Human:  opts.human,
 		Digest: opts.showDigests,
 		Images: images,
 	}

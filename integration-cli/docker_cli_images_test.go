@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -356,4 +358,22 @@ func (s *DockerSuite) TestImagesFormatDefaultFormat(c *check.C) {
 
 	out, _ = dockerCmd(c, "--config", d, "images", "-q", "myimage")
 	c.Assert(out, checker.Equals, imageID+"\n", check.Commentf("Expected to print only the image id, got %v\n", out))
+}
+
+func (s *DockerSuite) TestImagesHumanOptionFalse(c *check.C) {
+	out, _ := dockerCmd(c, "images", "--human=false", "busybox")
+	lines := strings.Split(out, "\n")
+	sizeColumnRegex, _ := regexp.Compile("SIZE +")
+	indices := sizeColumnRegex.FindStringIndex(lines[0])
+	startIndex := indices[0]
+	endIndex := indices[1]
+	for i := 1; i < len(lines)-1; i++ {
+		if endIndex > len(lines[i]) {
+			endIndex = len(lines[i])
+		}
+		sizeString := lines[i][startIndex:endIndex]
+
+		_, err := strconv.Atoi(strings.TrimSpace(sizeString))
+		c.Assert(err, checker.IsNil, check.Commentf("The size '%s' was not an Integer", sizeString))
+	}
 }

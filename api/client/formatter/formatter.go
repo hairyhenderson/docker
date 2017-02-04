@@ -17,10 +17,13 @@ const (
 	tableFormatKey = "table"
 	rawFormatKey   = "raw"
 
-	defaultContainerTableFormat       = "table {{.ID}}\t{{.Image}}\t{{.Command}}\t{{.RunningFor}} ago\t{{.Status}}\t{{.Ports}}\t{{.Names}}"
-	defaultImageTableFormat           = "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedSince}} ago\t{{.Size}}"
-	defaultImageTableFormatWithDigest = "table {{.Repository}}\t{{.Tag}}\t{{.Digest}}\t{{.ID}}\t{{.CreatedSince}} ago\t{{.Size}}"
-	defaultQuietFormat                = "{{.ID}}"
+	defaultContainerTableFormat            = "table {{.ID}}\t{{.Image}}\t{{.Command}}\t{{.RunningFor}} ago\t{{.Status}}\t{{.Ports}}\t{{.Names}}"
+	defaultImageTableFormat                = "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}\t{{.RawSize}}"
+	defaultImageTableHumanFormat           = "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedSince}} ago\t{{.Size}}"
+	defaultImageTableFormatWithDigest      = "table {{.Repository}}\t{{.Tag}}\t{{.Digest}}\t{{.ID}}\t{{.CreatedAt}}\t{{.RawSize}}"
+	defaultImageTableHumanFormatWithDigest = "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedSince}} ago\t{{.Size}}"
+
+	defaultQuietFormat = "{{.ID}}"
 )
 
 // Context contains information required by the formatter to print the output as desired.
@@ -107,6 +110,7 @@ type ContainerContext struct {
 type ImageContext struct {
 	Context
 	Digest bool
+	Human  bool
 	// Images
 	Images []types.Image
 }
@@ -168,6 +172,11 @@ func (ctx ImageContext) Write() {
 		}
 		if ctx.Quiet {
 			ctx.Format = defaultQuietFormat
+		}
+		if ctx.Human {
+			ctx.Format = defaultImageTableHumanFormat
+		} else if ctx.Human && ctx.Digest {
+			ctx.Format = defaultImageTableHumanFormatWithDigest
 		}
 	case rawFormatKey:
 		if ctx.Quiet {
